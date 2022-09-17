@@ -1,0 +1,306 @@
+// Autores: Francisco Cuschie, Florencia Cardinali.
+// Mails: francuschie@gmail.com / florenciapaulacardinali@gmail.com
+// Tema: Mascota virtual
+// Fecha de entrega: 22/06/2022 19:00
+// Concepto: Programacion 1, TUP - 2022, UTN.
+
+
+#include "SFML/Graphics.hpp"
+#include <string>
+#include <iostream>
+#include <fstream>
+#include "Gato.h"
+
+using namespace std;
+void Animacion(sf::RenderWindow& Ventana, sf::RectangleShape& Boton1, sf::RectangleShape& Boton2, sf::RectangleShape& Boton3, sf::Sprite& Fondo, sf::Texture& Textura, int Filas, int Columnas, sf::Text &Nombres);
+
+int main()
+{
+ // Creacion 
+    Gato Miguel("Miguel");
+    Miguel.RecuperarEstado();
+    int estado;
+
+//Tiempo SOLO DE LOS FRAMMES
+    sf::Clock Reloj;
+    sf::Time Tiempo;
+  
+ //Tiempo de los ESTADOS
+    sf::Clock RelojHMB;
+    sf::Time TiempoHMB;
+    sf::Clock RelojDR;
+    sf::Time TiempoDR;
+    sf::Clock RelojJU;
+    sf::Time TiempoJU;
+
+// Datos y seteos de video y eventos
+    sf::RenderWindow LaVentanita(sf::VideoMode(650, 580), "Gatito Game");
+    sf::Event event;      
+
+//Texto:
+    sf::Font FuenteBoonita;
+    FuenteBoonita.loadFromFile("fuentes/Solaris.ttf");
+    sf::Text NombresText;
+    NombresText.setFont(FuenteBoonita);
+    sf::String Nombres = "Fran Cuschie - Flor Cardinali";
+    NombresText.setString(Nombres);
+    NombresText.setFillColor(sf::Color(0, 0, 0));
+    NombresText.setCharacterSize(30);
+    NombresText.setPosition(310, 520);
+
+//Seteos del Fondo:
+    sf::Texture TextFondo;
+    TextFondo.loadFromFile("graficos/piso2.png");
+    sf::Sprite Fondo(TextFondo);
+    
+// Datos y seteos del STAND BY:
+    sf::Texture texturaSB;
+    texturaSB.loadFromFile("graficos/standby.png"); 
+
+///Seteo Animacion de Comer, 4x4
+    sf::Texture texturaCOM;
+    texturaCOM.loadFromFile("graficos/comer.png");
+ 
+ //Seteo Animacion de hambre, 4x4  
+    sf::Texture texturaHBR;
+    texturaHBR.loadFromFile("graficos/hambre.png");
+
+//Seteo Animacion de Sueño, 4x4
+    sf::Texture texturaSUE;
+    texturaSUE.loadFromFile("graficos/suenio.png");
+
+//Seteo Animacion de jugar, 4x4  
+    sf::Texture texturaJU;
+    texturaJU.loadFromFile("graficos/jugar.png");
+  
+ //Seteo Animacion de Aburrimiento, 4x4  
+    sf::Texture texturaABU;
+    texturaABU.loadFromFile("graficos/aburrido.png");
+
+//Seteo Animacion de acostarse y dormir, 7x7
+    sf::Texture texturaDR;
+    texturaDR.loadFromFile("graficos/Acostarse.png");
+
+ ///Seteo Animacion de Muerte, 4x4
+    sf::Texture texturaMUERTE;
+    texturaMUERTE.loadFromFile("graficos/muerte.png");
+    sf::Sprite Muerte(texturaMUERTE);
+    Muerte.setPosition(70.f, 150.f);
+  
+ //Botones:
+    // Boton de Alimentar:
+        sf::RectangleShape BotonA(sf::Vector2f(96.f, 96.f));
+        BotonA.setPosition(480.f, 10.f);
+        sf::Texture texturaBotA;
+        texturaBotA.loadFromFile("graficos/botonalimentar.png");
+        BotonA.setTexture(&texturaBotA);
+        BotonA.setScale(1.7f,1.7f);
+    //Boton de Jugar:
+        sf::RectangleShape BotonJ(sf::Vector2f(96.f, 96.f));
+        BotonJ.setPosition(480.f, 183.2f);
+        sf::Texture texturaBotJ;
+        texturaBotJ.loadFromFile("graficos/botonjugar.png");
+        BotonJ.setTexture(&texturaBotJ);
+        BotonJ.setScale(1.7f, 1.7f);
+    //Boton de Dormir:
+        sf::RectangleShape BotonD(sf::Vector2f(96.f, 96.f));
+        BotonD.setPosition(480.f, 356.4f);
+        sf::Texture texturaBotD;
+        texturaBotD.loadFromFile("graficos/botondormir.png");
+        BotonD.setTexture(&texturaBotD);
+        BotonD.setScale(1.7f, 1.7f);
+    //Boton de retry
+        sf::RectangleShape BotonRT(sf::Vector2f(120.f, 32.f));
+        BotonRT.setPosition(180.f, 60.f);
+        sf::Texture texturaBotRT;
+        texturaBotRT.loadFromFile("graficos/Retry.png");
+        BotonRT.setTexture(&texturaBotRT);
+        BotonRT.setScale(2.5f, 2.5f);
+     
+
+        //Variables de control de funcionamioento
+        sf::Clock RelojPrueba;
+        sf::Time TiempoPrueba;
+
+ // Bucle principal
+  while (LaVentanita.isOpen()) 
+  {
+      while (LaVentanita.pollEvent(event))
+      {
+          switch (event.type)
+          {
+          case sf::Event::EventType::Closed:
+          {
+              Miguel.GuardarEstado();
+              LaVentanita.close();
+          }
+          case sf::Event::MouseButtonPressed:
+          {
+              //buscar las cordenadas del mosue
+              sf::Vector2i DondeEstaElMouse_int = sf::Mouse::getPosition(LaVentanita);
+              sf::Vector2f DondeEstaElMouse_float(static_cast<float>(DondeEstaElMouse_int.x), static_cast<float>(DondeEstaElMouse_int.y));
+
+              if (estado != 4)
+              {
+                  //interaccion con Boton Alimentar
+                  if (BotonA.getGlobalBounds().contains(DondeEstaElMouse_float))
+                  {
+                      Miguel.Alimentar();
+                      Animacion(LaVentanita, BotonA, BotonJ, BotonD, Fondo, texturaCOM, 4, 4, NombresText);
+                  }
+
+                  if (BotonD.getGlobalBounds().contains(DondeEstaElMouse_float))
+                  {
+                      Miguel.Dormir();
+                      Animacion(LaVentanita, BotonA, BotonJ, BotonD, Fondo, texturaDR, 7, 7, NombresText);
+                  }
+
+                  if (BotonJ.getGlobalBounds().contains(DondeEstaElMouse_float))
+                  {
+                      Miguel.Jugar();
+                      Animacion(LaVentanita, BotonA, BotonJ, BotonD, Fondo, texturaJU, 4, 4, NombresText);
+                  }
+              } //corchete del if
+              else
+              {
+                  if (BotonRT.getGlobalBounds().contains(DondeEstaElMouse_float))
+                  {
+                      Miguel.ResetearEstados();
+                      Fondo.setColor(sf::Color(255, 255, 255, 255));
+                  }
+              }
+          }
+          }//Switch 
+      }//While pollEvent
+
+      //Tiempo para el aburrimeinto
+      TiempoJU = RelojJU.getElapsedTime();
+      if (TiempoJU.asSeconds() > 30)
+      {
+          Miguel.QuitarAburrimiento();
+          RelojJU.restart();
+      }
+      //Tiempo para el sueño
+      TiempoDR = RelojDR.getElapsedTime();
+      if (TiempoDR.asSeconds() > 20)
+      {
+          Miguel.QuitarEnergia();
+          RelojDR.restart();
+      }
+      //Tiempo para el hambre
+      TiempoHMB = RelojHMB.getElapsedTime();
+      if (TiempoHMB.asSeconds() > 15)
+      {
+          Miguel.QuitarHambre();
+          RelojHMB.restart();
+      }
+      TiempoPrueba = RelojPrueba.getElapsedTime();
+      if (TiempoPrueba.asSeconds() > 0.8)
+      {
+          Miguel.MostrarEstados();
+      }
+      RelojPrueba.restart();
+      /*
+Cree un rectangulo que se llama SB, al que luego le puse la textura
+notese que:
+
+- Yo saque el tamaño de cada sprite de la consola:
+std::cout << "x = "<< matriz.x << " y = " << matriz.y;
+
+- "Vector2u" es un tipo de dato matriz o arreglo de dos dimenciones con unsigneds ints y
+"Vector2f" es un arreglo de dos dimenciuones con floats, por eso no use la variable "matriz".
+
+- "setTextureRect" asigna a mi cuadrado (SB) el segmento que necesitas de la textura y
+"IntRect" lo hace en base a:
+Parametro 1: El tamaño de x del segmento (matriz.x) * el x guardado en el arreglo UltimoFrame
+Parametro 2: El tamaño de y del segmento (matriz.y) *  el y guardado en el arreglo UltimoFrame
+Parametro 3: El tamaño del segmento en x (matriz.x)
+Parametro 4: el tamaño del segmento en y (matriz.y)
+*/
+      Miguel.Chequeo(estado);
+      switch (estado)
+      {
+      case 1: {
+          //Animación de Hambre
+          Animacion(LaVentanita, BotonA, BotonJ, BotonD, Fondo, texturaHBR, 4, 4, NombresText);
+          break;
+      }
+      case 2: {
+          // Animación de Sueño
+          Animacion(LaVentanita, BotonA, BotonJ, BotonD, Fondo, texturaSUE, 4, 4, NombresText);
+          break;
+      }
+      case 3: {
+          //Animación de aburrido
+          Animacion(LaVentanita, BotonA, BotonJ, BotonD, Fondo, texturaABU, 4, 4, NombresText);
+          break;
+      }
+      case 4: {
+          Fondo.setColor(sf::Color(120, 120, 120, 255));
+          LaVentanita.draw(Fondo);
+          LaVentanita.draw(BotonRT);
+          LaVentanita.draw(Muerte);
+          LaVentanita.display();
+          break;
+      }
+      case 5:
+      {
+          //animacion stand by
+          Animacion(LaVentanita, BotonA, BotonJ, BotonD, Fondo, texturaSB, 4, 4, NombresText);
+          break;
+      }
+
+      }//corchete swich
+
+      //limpio la ventana
+      LaVentanita.clear();
+
+   }//Corchete del While principal
+}// Corchete del main 
+
+//Funcion encargada de mostrar y secuenciar los frames de cada animacion 
+// Ventana, Boton1,Boton2,boton3, fondo, textura de la aniamcion, filas, columnas.
+void Animacion(sf::RenderWindow &Ventana,sf::RectangleShape &Boton1, sf::RectangleShape &Boton2, sf::RectangleShape &Boton3,sf::Sprite &Fondo,sf::Texture &Textura, int Filas, int Columnas, sf::Text &Nombres)
+{
+    sf::Clock RelojFuncion;
+    sf::Time TiempoFuncion;
+
+    sf::RectangleShape Rectangulo(sf::Vector2f(384.f, 384.f));
+    Rectangulo.setTexture(&Textura);
+    sf::Vector2u Matriz = Textura.getSize();
+    Matriz.x = Matriz.x / Filas;
+    Matriz.y = Matriz.y / Columnas;
+    Rectangulo.setPosition(70.f, 150.f);
+    sf::Vector2i UltimoFrame(0, 0);
+    while (!(UltimoFrame.x == (Filas - 1) && UltimoFrame.y >= (Columnas - 1)))
+    {
+        Ventana.draw(Fondo);
+        Ventana.draw(Boton1);
+        Ventana.draw(Boton2);
+        Ventana.draw(Boton3);
+        Ventana.draw(Nombres);
+        TiempoFuncion = RelojFuncion.getElapsedTime();
+        if (TiempoFuncion.asSeconds() > 0.1)
+        {
+            if (UltimoFrame.x > (Filas - 1))
+            {
+                UltimoFrame.x = 0;
+                UltimoFrame.y = UltimoFrame.y + 1;
+            }
+            Rectangulo.setTextureRect(sf::IntRect(Matriz.x * UltimoFrame.x, Matriz.y * UltimoFrame.y, Matriz.x, Matriz.y));
+            Ventana.draw(Rectangulo);
+            UltimoFrame.x = UltimoFrame.x + 1;
+            RelojFuncion.restart();
+            Ventana.display();
+        }
+        Ventana.clear();
+    }
+}
+
+
+// (AL CAMBIAR ESTE MENSAJE, AGREGAR EL CAMBIO)
+// Flor: 01/06/2022 - while y cierre de ventana, clase mascota
+// Flor: 03/06/2022 - carga de una sola textura y asignacion de pedazos de esta a sprites.Manejo de sprites y muchos comentarios.
+// Flor: 03/06/2022 - Añadi por fin una forma para crear animacion y con eso una forma de retyrasar el tiempo que se tarda un ciclo del while agregando otra libreria (windows.h)
+// Flor  06/06/2022 - Añadi Botones que aun no funcionan a la pantalla, tambien añadi la plantilla de la accion "hambiento" listo para usar pero sin implementar.
+// Flor  08/06/2022 - Logre que el boton alimentar funcione y le asigne su animacion. corregi errores para que la animacion de stand by no se corte y la aniumacion comer no se solape

@@ -1,0 +1,2 @@
+C:\Users\Flor\Desktop\UTN\PROYECTO FINAL\c++\SFML.Base1\x64\Debug\Projecto Tama.exe
+C:\Users\Flor\Desktop\UTN\PROYECTO FINAL\c++\MascotaVirtual\x64\Debug\Projecto Tama.exe

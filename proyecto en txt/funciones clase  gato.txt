@@ -1,0 +1,165 @@
+#include "Gato.h"
+#include <fstream>
+#include <iostream>
+
+using namespace std;
+
+//El contructor pide el nombre
+Gato::Gato(string StringNombre = "Miguel") {
+    nombre = StringNombre;
+}
+
+// Reducción de los Estados
+
+void Gato::QuitarHambre() {
+    if (ContHambre >= 2)
+        ContHambre = ContHambre - 2;
+    else
+        ContHambre = 0;
+}
+    
+void Gato::QuitarEnergia() {
+
+    if (ContEnergia >= 2)
+        ContEnergia = ContEnergia - 2;
+    else
+        ContEnergia = 0;
+    
+}
+
+void Gato::QuitarAburrimiento() {
+
+    if (ContAburrimiento >= 2)
+        ContAburrimiento = ContAburrimiento - 2;
+    else
+        ContAburrimiento = 0;
+   
+}
+
+
+// Aumento de los Estados
+
+    //Suma 2 de Hambre al gato
+void Gato::Alimentar()
+{
+    if (ContHambre + 2 <= 10)
+    {
+        ContHambre = ContHambre + 2;
+    }
+    else
+    {
+        ContHambre = 10;
+    }
+}
+
+    //Suma 2 puntos de sueño al gato
+void Gato::Dormir()
+{
+    if (ContEnergia + 2 <= 10)
+    {
+        ContEnergia = ContEnergia + 2;
+    }
+    else
+    {
+        ContEnergia = 10;
+    }
+}
+
+    //Suma 2 de aburrimiento al gato 
+void Gato::Jugar()
+{
+    if (ContAburrimiento + 2 <= 10)
+    {
+        ContAburrimiento = ContAburrimiento + 2;
+    }
+    else
+    {
+        ContAburrimiento = 10;
+    }
+}
+
+//Al llegar a 0 un contador devulve 9, el hambre retorna 1, el sueño 2 y el aburrimiento 3, sino, devulve un valor elevado.
+void Gato::Chequeo(int &Estado) {
+   
+    if (ContHambre == 0 || ContEnergia == 0)
+    {
+        Estado = 4;
+        return;
+    }
+    if ((ContHambre < 6) && (ContHambre > 0))
+    {
+        Estado = 1;
+        return;
+    }
+    if ((ContEnergia < 6) && (ContEnergia > 0))
+    {
+        Estado = 2;
+        return;
+    }
+    if ((ContAburrimiento < 6) && (ContAburrimiento > 0))
+    {
+        Estado = 3;
+        return;
+    }
+    else
+    {
+        Estado = 5;
+        return;
+    }
+    
+}
+    
+
+//Guarda en archivo los contadores de estado del gato
+void Gato::GuardarEstado() {
+
+    ofstream OutGuardado;
+    OutGuardado.open("guardar/salvado.txt");
+
+    if (OutGuardado.is_open())
+    {
+        OutGuardado << ContHambre << endl;
+        OutGuardado << ContEnergia << endl;
+        OutGuardado << ContAburrimiento << endl;
+    }
+    else
+    {
+        cout << "NO SE GUARDOOOOO! " << endl;
+        return;
+    }
+    OutGuardado.close();
+
+}
+
+
+//Recupera el estado del gato desde el archivo
+void Gato::RecuperarEstado() {
+
+    ifstream InGuardado;
+    InGuardado.open("guardar/salvado.txt");
+    if (InGuardado.is_open()) {
+
+        InGuardado >> ContHambre;
+        InGuardado >> ContEnergia;
+        InGuardado >> ContAburrimiento;
+
+    }
+    else
+    {
+        cout << "NO SE RECUPERO NADA! " << endl;
+        return;
+    }
+
+    InGuardado.close();
+}
+void Gato::MostrarEstados() {
+    cout << "hambre: " << ContHambre << endl;
+    cout << "Energia: " << ContEnergia << endl;
+    cout << "Aburrimiento: " << ContAburrimiento << endl;
+    return;
+}
+void Gato::ResetearEstados() {
+    ContAburrimiento = 10;
+    ContEnergia = 10;
+    ContHambre = 10;
+}
